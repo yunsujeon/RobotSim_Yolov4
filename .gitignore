@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+./pytorch-YOLOv4/yolo4.conv.137.pth
+./pytorch-YOLOv4/yolo4.pth
+./pytorch-YOLOv4/yolo4.weights
