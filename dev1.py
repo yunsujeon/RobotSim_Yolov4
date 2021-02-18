@@ -25,6 +25,7 @@ import numpy as np
 import pyautogui
 from mss import mss
 import subprocess
+import cv2
 
 """hyper parameters"""
 use_cuda = True
@@ -33,9 +34,7 @@ ROI_SET = True
 x1, y1, x2, y2 = 0, 0, 0, 0
 
 def detect_cv2(cfgfile, weightfile, imgfile):
-    import cv2
     m = Darknet(cfgfile)
-
     m.print_network()
     m.load_weights(weightfile)
     print('Loading weights from %s... Done!' % (weightfile))
@@ -67,9 +66,7 @@ def detect_cv2(cfgfile, weightfile, imgfile):
 
 
 def detect_cv2_camera(cfgfile, weightfile):
-    import cv2
     m = Darknet(cfgfile)
-
     m.print_network()
     m.load_weights(weightfile)
     print('Loading weights from %s... Done!' % (weightfile))
@@ -95,16 +92,11 @@ def detect_cv2_camera(cfgfile, weightfile):
     mon = {'top': 100, 'left': 100, 'width': 1500, 'height': 1000}
     sct = mss()
 
+    print(m.width,m.height)
     #윈도우 하면 읽어오기
     while True:
         screenshot = sct.grab(mon)
         pic = Image.frombytes("RGB", (screenshot.width, screenshot.height), screenshot.rgb)
-
-
-        # bbox = (500,500,500+1280,500+720) #찍는속도가 느리다
-        # pic = ImageG.grab((bbox))
-
-        # pic = pyautogui.screenshot(region=(100,100,1280,720)) #되긴되는데 찍는 속도가 너무 느리다.
 
         image = np.array(pic)
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
@@ -147,11 +139,42 @@ def detect_cv2_camera(cfgfile, weightfile):
     # cap.release()
 
 
-def detect_cv2_sim() :
-    #소켓통신을 해서 계속 프레임을 받아오고  yolo돌리고 돌린 결과를 다시 통신해서 보내주기
-    #우선 프로그램을 실행시킨다.
-    out = subprocess.check_output(['../habitat-sim/./build/viewer','--enable-physics', '../habitat-sim/data/scene_datasets/habitat-test-scenes/van-gogh-room.glb'])
-    print(out)
+def detect_cv2_sim_vid(cfgfile, weightfile) :
+
+    if args.record == 1:
+        subprocess.run(["python", "../habitat-sim/interaction.py"])
+
+    m = Darknet(cfgfile)
+    m.print_network()
+    m.load_weights(weightfile)
+    print('Loading weights from %s... Done!' % (weightfile))
+    if use_cuda:
+        m.cuda()
+    print (m.width, m.height)
+
+    num_classes = m.num_classes
+    if num_classes == 20:
+        namesfile = 'data/voc.names'
+    elif num_classes == 80:
+        namesfile = 'data/coco.names'
+    else:
+        namesfile = 'data/x.names'
+    class_names = load_class_names(namesfile)
+
+    cap = cv2.VideoCapture('../habitat-sim/output/fetch.mp4')
+    while (cap.isOpened()):
+        ret, frame = cap.read()
+        sized = cv2.resize(frame, (m.width, m.height))
+        # sized = cv2.cvtColor(sized, cv2.COLOR_BGR2RGB)
+
+        boxes = do_detect(m, sized, 0.4, 0.6, use_cuda) #ndarray 를 numpy로 해서 yolo들어가게 해준다.
+
+        result_img = plot_boxes_cv2(frame, boxes[0], savename=None, class_names=class_names)
+        cv2.imshow('Yolo demo', result_img)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+    cap.release()
+
     return 0
 
 def get_args():
@@ -159,6 +182,7 @@ def get_args():
     parser.add_argument('-frame', type=int,
                         default=0,
                         help='frame from robot simulation', dest='frame')
+    parser.add_argument('-record', type=int, default=0, help='want create video=1',dest='record')
     parser.add_argument('-cfgfile', type=str, default='./cfg/yolov4.cfg',
                         help='path of cfg file', dest='cfgfile')
     parser.add_argument('-weightfile', type=str,
@@ -176,10 +200,20 @@ def get_args():
 
 if __name__ == '__main__':
     #얘의 프레임을 받아와야된다.
+    # imgfile = '../habitat-sim/build/screenshots/0.png'
+    # imgfile = '../../data2.png'
+    # img = cv2.imread(imgfile,cv2.IMREAD_UNCHANGED)
+    # print(img)
+    # print(img.shape)
+    # cv2.imshow('df',img)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+
     args = get_args()
-    args.frame=1
+
     if args.frame != 0 :
-        detect_cv2_sim ()
+        detect_cv2_sim_vid (args.cfgfile, args.weightfile)
+
     elif args.imgfile != 0 :
         detect_cv2(args.cfgfile, args.weightfile, args.imgfile)
         # detect_imges(args.cfgfile, args.weightfile)
