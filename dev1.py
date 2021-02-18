@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 '''
-@Time          : 20/04/25 15:49
-@Author        : huguanghao
-@File          : demo.py
+@Time          : 21/02/18 14:50
+@Author        : yunsujeon
+@File          : dev1.py
 @Noice         :
 @Modificattion :
     @Author    :
@@ -29,19 +29,16 @@ import cv2
 
 """hyper parameters"""
 use_cuda = True
-
 ROI_SET = True
 x1, y1, x2, y2 = 0, 0, 0, 0
 
-def detect_cv2(cfgfile, weightfile, imgfile):
+def load_network(cfgfile,weightfile):
     m = Darknet(cfgfile)
     m.print_network()
     m.load_weights(weightfile)
     print('Loading weights from %s... Done!' % (weightfile))
-
     if use_cuda:
         m.cuda()
-
     num_classes = m.num_classes
     if num_classes == 20:
         namesfile = 'data/voc.names'
@@ -50,6 +47,13 @@ def detect_cv2(cfgfile, weightfile, imgfile):
     else:
         namesfile = 'data/x.names'
     class_names = load_class_names(namesfile)
+    return m,class_names
+
+##############################################################
+
+##############################################################
+
+def detect_cv2_img(imgfile,m,class_names):
 
     img = cv2.imread(imgfile)
     sized = cv2.resize(img, (m.width, m.height))
@@ -64,31 +68,11 @@ def detect_cv2(cfgfile, weightfile, imgfile):
 
     plot_boxes_cv2(img, boxes[0], savename='predictions.jpg', class_names=class_names)
 
+##############################################################
 
-def detect_cv2_camera(cfgfile, weightfile):
-    m = Darknet(cfgfile)
-    m.print_network()
-    m.load_weights(weightfile)
-    print('Loading weights from %s... Done!' % (weightfile))
+##############################################################
 
-    if use_cuda:
-        m.cuda()
-
-    # cap = cv2.VideoCapture(0)
-    # # cap = cv2.VideoCapture("./test.mp4")
-    # cap.set(3, 1280)
-    # cap.set(4, 720)
-    # print("Starting the YOLO loop...")
-
-    num_classes = m.num_classes
-    if num_classes == 20:
-        namesfile = 'data/voc.names'
-    elif num_classes == 80:
-        namesfile = 'data/coco.names'
-    else:
-        namesfile = 'data/x.names'
-    class_names = load_class_names(namesfile)
-
+def detect_cv2_crop(m,class_names):
     mon = {'top': 100, 'left': 100, 'width': 1500, 'height': 1000}
     sct = mss()
 
@@ -120,46 +104,42 @@ def detect_cv2_camera(cfgfile, weightfile):
 
     cv2.destroyAllWindows()
 
-    # 카메라로 확인하기
-    # while True:
-    #     ret, img = cap.read()
-    #     sized = cv2.resize(img, (m.width, m.height))
-    #     sized = cv2.cvtColor(sized, cv2.COLOR_BGR2RGB)
-    #
-    #     start = time.time()
-    #     boxes = do_detect(m, sized, 0.4, 0.6, use_cuda)
-    #     finish = time.time()
-    #     print('Predicted in %f seconds.' % (finish - start))
-    #.
-    #     result_img = plot_boxes_cv2(img, boxes[0], savename=None, class_names=class_names)
-    #
-    #     cv2.imshow('Yolo demo', result_img)
-    #     cv2.waitKey(1)
-    #
-    # cap.release()
+##############################################################
 
+##############################################################
 
-def detect_cv2_sim_vid(cfgfile, weightfile) :
+def detect_cv2_webcam(m,class_names):
+    cap = cv2.VideoCapture(0)
+    cap.set(3, 1280)
+    cap.set(4, 720)
+    print("Starting the YOLO loop...")
+
+    while True:
+        ret, img = cap.read()
+        sized = cv2.resize(img, (m.width, m.height))
+        sized = cv2.cvtColor(sized, cv2.COLOR_BGR2RGB)
+
+        start = time.time()
+        boxes = do_detect(m, sized, 0.4, 0.6, use_cuda)
+        finish = time.time()
+        print('Predicted in %f seconds.' % (finish - start))
+
+        result_img = plot_boxes_cv2(img, boxes[0], savename=None, class_names=class_names)
+
+        cv2.imshow('Yolo demo', result_img)
+        cv2.waitKey(1)
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+##############################################################
+
+##############################################################
+
+def detect_cv2_sim_vid(m,class_names) :
 
     if args.record == 1:
         subprocess.run(["python", "../habitat-sim/interaction.py"])
-
-    m = Darknet(cfgfile)
-    m.print_network()
-    m.load_weights(weightfile)
-    print('Loading weights from %s... Done!' % (weightfile))
-    if use_cuda:
-        m.cuda()
-    print (m.width, m.height)
-
-    num_classes = m.num_classes
-    if num_classes == 20:
-        namesfile = 'data/voc.names'
-    elif num_classes == 80:
-        namesfile = 'data/coco.names'
-    else:
-        namesfile = 'data/x.names'
-    class_names = load_class_names(namesfile)
 
     cap = cv2.VideoCapture('../habitat-sim/output/fetch.mp4')
     while (cap.isOpened()):
@@ -174,50 +154,59 @@ def detect_cv2_sim_vid(cfgfile, weightfile) :
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     cap.release()
-
     return 0
+
+##############################################################
+
+##############################################################
+
+def detect_cv2_sim_frame(m,class_names) :
+    # 아직 구현하지 못함
+    return 0
+
+##############################################################
+
+##############################################################
 
 def get_args():
     parser = argparse.ArgumentParser('Test your image or video by trained model.')
-    parser.add_argument('-frame', type=int,
+    parser.add_argument('-simvid', type=int,
                         default=0,
-                        help='frame from robot simulation', dest='frame')
-    parser.add_argument('-record', type=int, default=0, help='want create video=1',dest='record')
+                        help='video frame from robot simulation', dest='simvid')
+    parser.add_argument('-record', type=int, default=0,
+                        help='want create video=1',dest='record')
+    parser.add_argument('-imgfile', type=str, default=0,
+                        #default='./data/dog.jpg',
+                        help='path of your image file.', dest='imgfile')
+    parser.add_argument('-webcam', type=int, default=0, #웹캠인풋
+                        help='get frame use webcam', dest='webcam')
+    parser.add_argument('-simframe', type=int, default=0, #시뮬레이션 실시간
+                        help='video frame from realtim robot simulation API', dest='simframe')
+    parser.add_argument('-crop', type=int, default=0, #화면 크롭
+                        help='get crop frame on display', dest='crop')
     parser.add_argument('-cfgfile', type=str, default='./cfg/yolov4.cfg',
                         help='path of cfg file', dest='cfgfile')
     parser.add_argument('-weightfile', type=str,
                         # default='./checkpoints/Yolov4_epoch1.pth',
                         default='./yolov4.weights',
                         help='path of trained model.', dest='weightfile')
-    parser.add_argument('-imgfile', type=str,
-                        #default='./data/dog.jpg',
-                        default=0,
-                        help='path of your image file.', dest='imgfile')
     args = parser.parse_args()
-
     return args
 
-
 if __name__ == '__main__':
-    #얘의 프레임을 받아와야된다.
-    # imgfile = '../habitat-sim/build/screenshots/0.png'
-    # imgfile = '../../data2.png'
-    # img = cv2.imread(imgfile,cv2.IMREAD_UNCHANGED)
-    # print(img)
-    # print(img.shape)
-    # cv2.imshow('df',img)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
 
     args = get_args()
+    args.simvid = 1
+    args.record = 1
+    m,class_names=load_network(args.cfgfile, args.weightfile)
 
-    if args.frame != 0 :
-        detect_cv2_sim_vid (args.cfgfile, args.weightfile)
-
+    if args.simvid != 0 :
+        detect_cv2_sim_vid (m,class_names)
     elif args.imgfile != 0 :
-        detect_cv2(args.cfgfile, args.weightfile, args.imgfile)
-        # detect_imges(args.cfgfile, args.weightfile)
-        # detect_cv2(args.cfgfile, args.weightfile, args.imgfile)
-        # detect_skimage(args.cfgfile, args.weightfile, args.imgfile)
-    else:
-        detect_cv2_camera(args.cfgfile, args.weightfile)
+        detect_cv2_img(args.imgfile)
+    elif args.webcam !=0:
+        detect_cv2_webcam (m,class_names)
+    elif args.simframe !=0:
+        detect_cv2_sim_frame (m,class_names)
+    elif args.crop != 0 :
+        detect_cv2_crop(m,class_names)
