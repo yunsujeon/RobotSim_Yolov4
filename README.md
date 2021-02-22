@@ -18,7 +18,7 @@ https://github.com/facebookresearch/habitat-sim
 
 ## Run
 
-### Install Requirements
+#### Install Requirements
 
 1. anaconda setup and activate
 <pre><code>conda create -n <name> python==3.6</code></pre>
@@ -34,7 +34,7 @@ pip install -r requirements.txt
     * yolov4.pth(https://drive.google.com/open?id=1wv_LiFeCRYwtpkqREPeI13-gPELBDwuJ)
     * yolov4.conv.137.pth(https://drive.google.com/open?id=1fcbR0bWzYfIEdLJPzOsn4R5mlvR6IQyA)
 
-### Run
+#### Run
 
 1. Clone this repo
 <pre><code>git clone https://github.com/yunsujeon/RobotSim_Yolov4.git</code></pre>
