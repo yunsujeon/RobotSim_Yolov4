@@ -164,8 +164,9 @@ def detect_cv2_sim_vid(m, class_names):
 
 ##############################################################
 
-def detect_cv2_sim_frame(m, class_names):
-    # 아직 구현하지 못함
+
+def detect_cv2_sim_frame(m,class_names) :
+    # 구현중.. C++ API 사용
     return 0
 
 
