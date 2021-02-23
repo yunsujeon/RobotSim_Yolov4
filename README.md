@@ -30,3 +30,6 @@ python dev1.py -crop 1
 개발중
 (python dev1.py -simframe 1)
 
+
+./viewer --enable-physics ../data/scene_datasets/habitat-test-scenes/van-gogh-room.glb
+
