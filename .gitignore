@@ -128,7 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-./pytorch-YOLOv4
-./pytorch-YOLOv4/*
-./habitat-sim
-./habitat-sim/*
+.idea
+.vscode

@@ -106,7 +106,7 @@ Robot Simulation (Habitat-Sim) & YOLOv4 python API connection
 
   * AbstarctXApplication.cpp ---> RobotSim_Yolov4/habitat-sim/src/deps/magnum/src/Magnum/Platform/
 
-  * RobotSim_Yolov4_1/build/viewer(Link to shared Library) -> RobotSim_Yolov4/pytorch-YOLOv4/
+  * RobotSim_Yolov4_1/build/viewer(Link to shared Library) ---> RobotSim_Yolov4/pytorch-YOLOv4/
 
 **2. run dev1.py**
 
