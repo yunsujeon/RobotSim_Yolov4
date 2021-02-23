@@ -1,60 +1,54 @@
 # RobotSim_Yolov4
 
+![](https://img.shields.io/static/v1?label=python&message=3.6|3.7&color=blue)
+![](https://img.shields.io/static/v1?label=pytorch&message=1.4&color=<COLOR>)
+[![](https://img.shields.io/static/v1?label=license&message=Apache2&color=green)](./License.txt)
+
 Robot Simulation (Habitat-Sim) & YOLOv4 python API connection
 
-## Introduce
+# Introduce
 
   * 로봇시뮬레이션 내에서 object detection을 실행함으로써 실환경 test 시간 비용 아끼는 효과
   
-  * 사진, gif 등으로 소개
-  
   * map DB중 annotation set 있다면 training 도 시키는 방향으로의 발전가능성
+  
+  * Run 영상
+    * [with python script](https://youtu.be/I6H-kW7RpJ8)
+    * [with C++ API region crop](https://youtu.be/VNWqCfoSJis)
+  
+  
+# Required Software
+
+1. Habitat-Sim(https://github.com/Tianxiaomo/pytorch-YOLOv4)
+
+2. YOLOv4(https://github.com/facebookresearch/habitat-sim)
 
 
-## Required Software
+# Run
 
-1. Habitat-Sim
+## Install Requirements
 
-https://github.com/Tianxiaomo/pytorch-YOLOv4
+**1. Clone this repo**
+  <pre><code>git clone https://github.com/yunsujeon/RobotSim_Yolov4.git</code></pre>
 
-2. YOLOv4
+**2. anaconda setup and activate**
+  <pre><code>conda create -n name python==3.6.1</code></pre>
+  <pre><code>conda activate name</code></pre>
 
-https://github.com/facebookresearch/habitat-sim
-
-
-## Run
-
-#### Install Requirements
-
-1. Clone this repo
-
-<pre><code>git clone https://github.com/yunsujeon/RobotSim_Yolov4.git</code></pre>
-
-2. anaconda setup and activate
-
-<pre><code>conda create -n name python==3.6.1</code></pre>
-
-<pre><code>conda activate name</code></pre>
-
-3. Install packages
-
-<pre><code>cd RobotSim_Yolov4</code></pre>
-
-<pre><code>pip install -r requirements.txt</code></pre>
+**3. Install packages**
+  <pre><code>cd RobotSim_Yolov4</code></pre>
+  <pre><code>pip install -r requirements.txt</code></pre>
 
   * nvidia graphic driver must be installed on your environment
 
-4. Clone Habitat-Sim & Yolov4
+**4. Clone Habitat-Sim & Yolov4**
+  <pre><code>git clone https://github.com/facebookresearch/habitat-sim.git</code></pre>
+  <pre><code>git clone https://github.com/Tianxiaomo/pytorch-YOLOv4.git</code></pre> 
 
-<pre><code>git clone https://github.com/facebookresearch/habitat-sim.git</code></pre>
-
-<pre><code>git clone https://github.com/Tianxiaomo/pytorch-YOLOv4.git</code></pre> 
-
-5. Installation and download
+**5. Installation and download**
 
   * Habitat-sim conda install
-  
-    * <pre><code>conda install habitat-sim -c conda-forge -c aihabitat</code></pre>
+  <pre><code>conda install habitat-sim -c conda-forge -c aihabitat</code></pre>
     
   * Yolov4 Weights Download
   
@@ -66,19 +60,19 @@ https://github.com/facebookresearch/habitat-sim
   
     * RobotSim_Yolov4/pytorch-YOLOv4/
   
-6. Build Habitat-Sim
+**6. Build Habitat-Sim**
 
-<pre><code>cd habitat-sim</code></pre>
+  <pre><code>cd habitat-sim</code></pre>
 
-<pre><code>./build.sh</code></pre>
+  <pre><code>./build.sh</code></pre>
 
   * If you got a build error like "raise CalledProcessError ..etc.." , try again ./build.sh
   
-* **If you got a common-testing-issues GL**
+* *If you got a common-testing-issues GL*
 
   * go to [link](https://github.com/facebookresearch/habitat-sim#common-testing-issues)
   
-7. Download example map file / unzip correct location
+**7. Download example map file / unzip correct location**
 
   * habitat-test-scenes [link](https://drive.google.com/file/d/119Arq6EC-Jiz7gCFP3X49h1xtiijb2aa/view?usp=drivesdk)
   
@@ -100,45 +94,41 @@ https://github.com/facebookresearch/habitat-sim
     
   * In this repo's example code, use mp3d example map. You can use other maps with [this link](https://github.com/facebookresearch/habitat-sim#datasets)
   
-#### Run Demo
+## Run Demo
 
-1. Replace python files
+**1. Replace python files**
 
-dev1.py ---> RobotSim_Yolov4/pytorch-YOLOv4/
+  * dev1.py ---> RobotSim_Yolov4/pytorch-YOLOv4/
 
-interaction.py ---> RobotSim_Yolov4/habitat-sim/
+  * interaction.py ---> RobotSim_Yolov4/habitat-sim/
 
-utils.py ---> RobotSim_Yolov4/pytorch-YOLOv4/tool/
+  * utils.py ---> RobotSim_Yolov4/pytorch-YOLOv4/tool/
 
-AbstarctXApplication.cpp ---> RobotSim_Yolov4/habitat-sim/src/deps/magnum/src/Magnum/Platform/
+  * AbstarctXApplication.cpp ---> RobotSim_Yolov4/habitat-sim/src/deps/magnum/src/Magnum/Platform/
 
-RobotSim_Yolov4_1/build/viewer(Link to shared Library) -> RobotSim_Yolov4/pytorch-YOLOv4/
+  * RobotSim_Yolov4_1/build/viewer(Link to shared Library) -> RobotSim_Yolov4/pytorch-YOLOv4/
 
-2. run dev1.py
+**2. run dev1.py**
 
 * before run dev1.py, setting your path on interaction.py
 
   * line 35 / line 110 / line 601
-  
-<pre><code>cd pytorch-YOLOv4</code></pre> 
+  <pre><code>cd pytorch-YOLOv4</code></pre> 
 
-  * Record new script-made video and make yolo video
-  
+  * Record new script-made video and make yolo video 
   <pre><code>python dev1.py -simvid 1 -record 1</code></pre>
   
-    * check video > path is **habitat-sim/output/fetch.mp4**
+  * check video > path is **habitat-sim/output/fetch.mp4**
     
-  *  make yolo video with exist script-made video
-  
+  * make yolo video with exist script-made video 
   <pre><code>python dev1.py -simvid 1</code></pre>
   
-  * API crop and yolo
-  
+  * API crop and yolo 
   <pre><code>python dev1.py -crop 1</code></pre>
 
-    * You have to move C++ API display to yolo's recognition region.
+  * You have to move C++ API display to yolo's recognition region.
 
-#### Make scripts your self
+## Make scripts your self
 
 1. You can watch tutorial provided by facebook research [link](https://aihabitat.org/docs/habitat-sim/index.html)
 
@@ -146,7 +136,7 @@ RobotSim_Yolov4_1/build/viewer(Link to shared Library) -> RobotSim_Yolov4/pytorc
 
   * Change or add python code, you can create new video.
   
-#### C++ API change map
+## C++ API change map
 
 1. You can change map on C++ API
 
@@ -159,7 +149,7 @@ RobotSim_Yolov4_1/build/viewer(Link to shared Library) -> RobotSim_Yolov4/pytorc
   <pre><code>subprocess.run(["./viewer", "--enable-physics", "../habitat-sim/data/scene_datasets/habitat-test-scenes/apartment_1.glb"])</code></pre>
 
 
-## Improvement
+# Improvement
 
   * You can test&train with Many Map Datasets and Annotations [habitat-sim-datasets](https://github.com/facebookresearch/habitat-sim#datasets)
 
